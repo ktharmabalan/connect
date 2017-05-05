@@ -168,26 +168,6 @@ public class Cell {
         colorType = type;
     }
 
-    public void render(SpriteBatch sb) {
-        timePassed += Gdx.graphics.getDeltaTime();
-        if(toDestroy()) {
-            sb.setColor(cellType.getDestroyColor());
-            sb.draw(texture, x, y, SIZE, SIZE);
-            setSelected(false);
-            setSearched(false);
-        } else {
-            sb.setColor(cellType.getColor());
-//            sb.draw(texture, x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
-
-//            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
-            if (isSelected()) {
-                sb.setColor(cellType.getSelectedColor());
-//                sb.draw(selected_animation.getKeyFrame(timePassed, true), x, y, SIZE, SIZE);
-            }
-            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
-        }
-    }
-
     public String getObject() {
         return row + "," + col;
     }
@@ -220,6 +200,26 @@ public class Cell {
         if((dy < 0 && y <= ydest) || (dy > 0 && y >= ydest)) {
             dy = 0;
             y = ydest;
+        }
+    }
+
+    public void render(SpriteBatch sb) {
+        timePassed += Gdx.graphics.getDeltaTime();
+        if(toDestroy()) {
+            sb.setColor(cellType.getDestroyColor());
+            sb.draw(texture, x, y, SIZE, SIZE);
+            setSelected(false);
+            setSearched(false);
+        } else {
+            sb.setColor(cellType.getColor());
+//            sb.draw(texture, x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
+
+//            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
+            if (isSelected()) {
+                sb.setColor(cellType.getSelectedColor());
+//                sb.draw(selected_animation.getKeyFrame(timePassed, true), x, y, SIZE, SIZE);
+            }
+            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
         }
     }
 }

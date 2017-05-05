@@ -1,9 +1,12 @@
 package ca.example.game;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -15,6 +18,7 @@ public class Grid {
 //    public static int PADDING = 20;
     public static int PADDING = 0;
     public static int SIZE = ConnectGame.WIDTH - PADDING * 2;
+    private final int SCORE_MULTIPLIER = 100;
 
 //    private Color bgColor  = new Color(0, 0, 0, 1);
     private Color bgColor  = Color.LIGHT_GRAY;
@@ -31,9 +35,21 @@ public class Grid {
     private int clickedCol;
     private Cell clickedCell;
     private ArrayList<Cell> selectedGroup;
-    Random ran = new Random();
+    private Random ran = new Random();
+
+    private BitmapFont font;
+    private boolean displayText = false;
+    private String text = "";
+    private Vector2 textLocation = new Vector2(0f, 0f);
+    private float displayTime = Gdx.graphics.getDeltaTime();
+    private int score = 0;
 
     public Grid(int[][] types) {
+        font = new BitmapFont();
+        font.setColor(Color.WHITE);
+        font.setColor(Color.PURPLE);
+        font.getData().setScale(2);
+
         numRows = types.length;
         numCols = types[0].length;
         grid = new Cell[numRows][numCols];
@@ -59,6 +75,7 @@ public class Grid {
 
     public void click(float mx, float my) {
         boolean cellClicked = false;
+        displayText = false;
 //
         // Sorting
 //        Collections.sort(selectedGroup, new Comparator<Cell>() {
@@ -109,11 +126,17 @@ public class Grid {
 
                         clickedCell = grid[row][col];
                         addGroup(clickedCell);
-//                        if(selectedGroup.size() > 1) {
-//                            for(Cell cell: selectedGroup) {
-//                                cell.setDestroy(true);
-//                            }
-//                        }
+                        if(selectedGroup.size() > 1) {
+                            displayTime = 0;
+//                            font.setColor(Color.WHITE);
+                            displayText = true;
+                            textLocation.set(mx, my);
+                            score += selectedGroup.size() * SCORE_MULTIPLIER;
+                            text = "" + selectedGroup.size() * SCORE_MULTIPLIER;
+                            for(Cell cell: selectedGroup) {
+                                cell.setDestroy(true);
+                            }
+                        }
 //                    }
                     cellClicked = true;
                     break;
@@ -208,26 +231,22 @@ public class Grid {
     private void getAbove(Cell cell) {
         if(cell.getRow() + 1 < numRows) {
             Cell above = grid[cell.getRow() + 1][cell.getCol()];
-            if(above.toDestroy()) {
-                getAbove(above);
-            } else{
+            if(!above.toDestroy()) {
                 cell.setCellType(above.getColorType());
+                cell.setSelected(false);
+                cell.setSearched(false);
                 cell.setDestroy(false);
+
                 cell.setPosition(
                         x + cell.getCol() * Cell.SIZE,
                         y + (cell.getRow() + 1) * Cell.SIZE);
                 cell.setDestination(
                         x + cell.getCol() * Cell.SIZE,
                         y + (cell.getRow()) * Cell.SIZE);
-
-                above.setCellType(ran.nextInt(3));
-                above.setPosition(
-                        x + above.getCol() * Cell.SIZE,
-                        y + (above.getRow() + 1) * Cell.SIZE);
-                above.setDestination(
-                        x + above.getCol() * Cell.SIZE,
-                        y + (above.getRow()) * Cell.SIZE);
             }
+            above.setDestroy(true);
+//            System.out.println("CELL: " + cell.getRow() + ", " + cell.getCol() + " GET ABOVE: " + above.getRow() + ", " + above.getCol());
+            getAbove(above);
         } else {
             if(cell.toDestroy()) {
                 cell.setCellType(ran.nextInt(3));
@@ -237,37 +256,9 @@ public class Grid {
                 cell.setDestination(
                         x + cell.getCol() * Cell.SIZE,
                         y + (cell.getRow()) * Cell.SIZE);
+                cell.setSelected(false);
+                cell.setSearched(false);
                 cell.setDestroy(false);
-            }
-        }
-    }
-
-    public void update(float dt) {
-        for(int row = 0; row < numRows; row++) {
-            for(int col = 0; col < numCols; col++) {
-                Cell cell = grid[row][col];
-                cell.update(dt);
-            }
-        }
-
-        for(int row = 0; row < numRows; row++) {
-            for (int col = 0; col < numCols; col++) {
-                Cell cell = grid[row][col];
-                if (cell.toDestroy()) {
-                    getAbove(cell);
-                }
-                cell.update(dt);
-            }
-        }
-    }
-
-    public void render(SpriteBatch sb) {
-        sb.setColor(bgColor);
-        sb.draw(texture, x - Cell.PADDING, y - Cell.PADDING, SIZE + Cell.PADDING * 2, SIZE + Cell.PADDING * 2);
-
-        for(int row = 0; row < numRows; row++) {
-            for(int col = 0; col < numCols; col++) {
-                grid[row][col].render(sb);
             }
         }
     }
@@ -333,6 +324,50 @@ public class Grid {
                 if (!temp.isSearched()) {
                     addGroup(temp);
                 }
+            }
+        }
+    }
+
+    public void update(float dt) {
+        for(int row = 0; row < numRows; row++) {
+            for(int col = 0; col < numCols; col++) {
+                Cell cell = grid[row][col];
+                cell.update(dt);
+            }
+        }
+
+        for(int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
+                Cell cell = grid[row][col];
+                if (cell.toDestroy()) {
+                    getAbove(cell);
+                }
+                cell.update(dt);
+            }
+        }
+    }
+
+    public void render(SpriteBatch sb) {
+        sb.setColor(bgColor);
+        sb.draw(texture, x - Cell.PADDING, y - Cell.PADDING, SIZE + Cell.PADDING * 2, SIZE + Cell.PADDING * 2);
+
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
+                grid[row][col].render(sb);
+            }
+        }
+
+        font.setColor(Color.PURPLE);
+        font.draw(sb, "SCORE: " + score, x, ConnectGame.HEIGHT - 20);
+
+        if (displayText) {
+            displayTime += Gdx.graphics.getDeltaTime();
+            if(displayTime < 0.5f) {
+//                font.getData().setScale(1);
+                font.setColor(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, 1.0f - displayTime);
+                font.draw(sb, "+" + text, textLocation.x, textLocation.y + displayTime * 100);
+            } else {
+                displayText = false;
             }
         }
     }

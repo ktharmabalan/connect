@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.util.Random;
+
 import ca.example.game.Grid;
 
 public class PlayState extends State {
@@ -19,15 +21,15 @@ public class PlayState extends State {
     public PlayState(StateManager stateManager) {
         super(stateManager);
 
-        int rows = 3;
-        int cols = 3;
+        int rows = 6;
+        int cols = 6;
 
-        int[][] g = {
+        /*int[][] g = {
                 {0,1,2},
                 {1,1,1},
                 {2,2,2}
-        };
-        /*int[][] g = new int[rows][cols];
+        };*/
+        int[][] g = new int[rows][cols];
 
         Random ran = new Random();
 
@@ -36,7 +38,7 @@ public class PlayState extends State {
                 int i = ran.nextInt(3);
                 g[r][c] = i;
             }
-        }*/
+        }
         grid = new Grid(g);
     }
 
