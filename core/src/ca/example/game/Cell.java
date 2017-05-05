@@ -1,11 +1,16 @@
 package ca.example.game;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Cell {
+
+
     public enum CellType {
         RED(Color.RED),
         GREEN(Color.GREEN),
@@ -36,9 +41,10 @@ public class Cell {
     public static CellType[] cellTypeValues = CellType.values();
 
     public static int SIZE;
-    public static int PADDING = 10;
+    public static int PADDING = 0;
 
     private CellType cellType;
+    private int colorType;
     private Texture texture;
 
     private float x;
@@ -55,11 +61,27 @@ public class Cell {
     private boolean selected;
     private boolean destroy;
 
-    private static float speed = 2000;
+    private static float speed = 100;
+    private Animation animation;
+    private Animation selected_animation;
+    private float timePassed = 0;
+
+    Texture[] icons = {
+            new Texture("icon.png")
+//            new Texture("icon0.png"),
+//            new Texture("icon1.png"),
+//            new Texture("icon2.png"),
+    };
+
+    Texture[] selected_icons = {
+            new Texture("white.png"),
+            new Texture("transparent.png"),
+    };
 
     public Cell(int type, float x, float y) {
         cellType = cellTypeValues[type];
-        texture = new Texture("white.png");
+        colorType = type;
+        texture = icons[0];
         this.x = x;
         this.y = y;
         selected = false;
@@ -68,7 +90,21 @@ public class Cell {
 
     public Cell(int type, float x, float y, int row, int col) {
         cellType = cellTypeValues[type];
-        texture = new Texture("white.png");
+        colorType = type;
+        texture = icons[0];
+//        texture = new Texture("white.png");
+//        texture = new Texture("icon1.png");
+
+//        animation = new Animation(1/2f, new TextureRegion(icons[0]),
+//                new TextureRegion(icons[1])
+//                ,
+//                new TextureRegion(icons[2]),
+//                new TextureRegion(icons[1])
+//                );
+        animation = new Animation(1/5f, new TextureRegion(icons[0]));
+
+        selected_animation = new Animation(1/2f, new TextureRegion(selected_icons[0]), new TextureRegion(selected_icons[1]));
+
         this.x = x;
         this.y = y;
         selected = false;
@@ -123,17 +159,32 @@ public class Cell {
         return cellType;
     }
 
+    public int getColorType() {
+        return colorType;
+    }
+
+    public void setCellType(int type) {
+        cellType = cellTypeValues[type];
+        colorType = type;
+    }
+
     public void render(SpriteBatch sb) {
+        timePassed += Gdx.graphics.getDeltaTime();
         if(toDestroy()) {
             sb.setColor(cellType.getDestroyColor());
             sb.draw(texture, x, y, SIZE, SIZE);
+            setSelected(false);
+            setSearched(false);
         } else {
             sb.setColor(cellType.getColor());
-            sb.draw(texture, x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
+//            sb.draw(texture, x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
+
+//            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
             if (isSelected()) {
                 sb.setColor(cellType.getSelectedColor());
-                sb.draw(texture, x, y, SIZE, SIZE);
+//                sb.draw(selected_animation.getKeyFrame(timePassed, true), x, y, SIZE, SIZE);
             }
+            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
         }
     }
 

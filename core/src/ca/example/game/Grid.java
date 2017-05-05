@@ -6,15 +6,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import ca.example.ConnectGame;
 
 public class Grid {
 
-    public static int PADDING = 20;
+//    public static int PADDING = 20;
+    public static int PADDING = 0;
     public static int SIZE = ConnectGame.WIDTH - PADDING * 2;
 
-    private Color bgColor  = new Color(0, 0, 0, 1);
+//    private Color bgColor  = new Color(0, 0, 0, 1);
+    private Color bgColor  = Color.LIGHT_GRAY;
     private Texture texture;
 
     private Cell[][] grid;
@@ -28,6 +31,7 @@ public class Grid {
     private int clickedCol;
     private Cell clickedCell;
     private ArrayList<Cell> selectedGroup;
+    Random ran = new Random();
 
     public Grid(int[][] types) {
         numRows = types.length;
@@ -70,7 +74,6 @@ public class Grid {
                     clickedRow = row;
                     clickedCol = col;
 
-
 //                    if(selectedGroup.contains(grid[row][col])) {
 //                        // Double clicked
 //                        for(Cell cell: selectedGroup) {
@@ -106,11 +109,11 @@ public class Grid {
 
                         clickedCell = grid[row][col];
                         addGroup(clickedCell);
-                        if(selectedGroup.size() > 1) {
-                            for(Cell cell: selectedGroup) {
-                                cell.setDestroy(true);
-                            }
-                        }
+//                        if(selectedGroup.size() > 1) {
+//                            for(Cell cell: selectedGroup) {
+//                                cell.setDestroy(true);
+//                            }
+//                        }
 //                    }
                     cellClicked = true;
                     break;
@@ -129,6 +132,7 @@ public class Grid {
         }
 
         if(dx > 0) {
+            // left to right
             if(clickedCol < numCols - 1) {
                 Cell temp = grid[clickedRow][clickedCol];
                 grid[clickedRow][clickedCol] = grid[clickedRow][clickedCol + 1];
@@ -138,14 +142,15 @@ public class Grid {
 
                 grid[clickedRow][clickedCol].setDestination(
                         x + clickedCol * Cell.SIZE,
-                        y + (numRows - clickedRow - 1) * Cell.SIZE);
+                        y + (clickedRow) * Cell.SIZE);
                 grid[clickedRow][clickedCol + 1].setDestination(
                         x + (clickedCol + 1) * Cell.SIZE,
-                        y + (numRows - clickedRow - 1) * Cell.SIZE);
+                        y + (clickedRow) * Cell.SIZE);
 
                 clickedCell = null;
             }
         } else if(dx < 0) {
+            // right to left
             if(clickedCol > 0) {
                 Cell temp = grid[clickedRow][clickedCol];
                 grid[clickedRow][clickedCol] = grid[clickedRow][clickedCol - 1];
@@ -155,29 +160,14 @@ public class Grid {
 
                 grid[clickedRow][clickedCol].setDestination(
                         x + clickedCol * Cell.SIZE,
-                        y + (numRows - clickedRow - 1) * Cell.SIZE);
+                        y + (clickedRow) * Cell.SIZE);
                 grid[clickedRow][clickedCol - 1].setDestination(
                         x + (clickedCol - 1) * Cell.SIZE,
-                        y + (numRows - clickedRow - 1) * Cell.SIZE);
+                        y + (clickedRow) * Cell.SIZE);
                 clickedCell = null;
             }
         } else if(dy > 0) {
-            if(clickedRow > 0) {
-                Cell temp = grid[clickedRow][clickedCol];
-                grid[clickedRow][clickedCol] = grid[clickedRow - 1][clickedCol];
-                grid[clickedRow][clickedCol].setRow(clickedRow);
-                grid[clickedRow - 1][clickedCol] = temp;
-                grid[clickedRow - 1][clickedCol].setRow(clickedRow - 1);
-
-                grid[clickedRow][clickedCol].setDestination(
-                        x + clickedCol * Cell.SIZE,
-                        y + (numRows - clickedRow - 1) * Cell.SIZE);
-                grid[clickedRow - 1][clickedCol].setDestination(
-                        x + clickedCol * Cell.SIZE,
-                        y + (numRows - clickedRow) * Cell.SIZE);
-                clickedCell = null;
-            }
-        } else if(dy < 0) {
+            // down to up
             if(clickedRow < numRows - 1) {
                 Cell temp = grid[clickedRow][clickedCol];
                 grid[clickedRow][clickedCol] = grid[clickedRow + 1][clickedCol];
@@ -187,10 +177,29 @@ public class Grid {
 
                 grid[clickedRow][clickedCol].setDestination(
                         x + clickedCol * Cell.SIZE,
-                        y + (numRows - clickedRow - 1) * Cell.SIZE);
+                        y + (clickedRow) * Cell.SIZE);
                 grid[clickedRow + 1][clickedCol].setDestination(
                         x + clickedCol * Cell.SIZE,
-                        y + (numRows - clickedRow - 2) * Cell.SIZE);
+                        y + (clickedRow + 1) * Cell.SIZE);
+                clickedCell = null;
+            }
+        } else if(dy < 0) {
+            // up to down
+            if(clickedRow > 0) {
+                Cell temp = grid[clickedRow][clickedCol];
+                System.out.println(temp.getRow());
+                System.out.println(grid[clickedRow - 1][clickedCol].getRow());
+                grid[clickedRow][clickedCol] = grid[clickedRow - 1][clickedCol];
+                grid[clickedRow][clickedCol].setRow(clickedRow);
+                grid[clickedRow - 1][clickedCol] = temp;
+                grid[clickedRow - 1][clickedCol].setRow(clickedRow - 1);
+
+                grid[clickedRow][clickedCol].setDestination(
+                        x + clickedCol * Cell.SIZE,
+                        y + (clickedRow) * Cell.SIZE);
+                grid[clickedRow - 1][clickedCol].setDestination(
+                        x + clickedCol * Cell.SIZE,
+                        y + (clickedRow - 1) * Cell.SIZE);
                 clickedCell = null;
             }
         }
@@ -199,24 +208,37 @@ public class Grid {
     private void getAbove(Cell cell) {
         if(cell.getRow() + 1 < numRows) {
             Cell above = grid[cell.getRow() + 1][cell.getCol()];
-            grid[cell.getRow() + 1][cell.getCol()] = cell;
-            grid[cell.getRow() + 1][cell.getCol()].setRow(cell.getRow());
+            if(above.toDestroy()) {
+                getAbove(above);
+            } else{
+                cell.setCellType(above.getColorType());
+                cell.setDestroy(false);
+                cell.setPosition(
+                        x + cell.getCol() * Cell.SIZE,
+                        y + (cell.getRow() + 1) * Cell.SIZE);
+                cell.setDestination(
+                        x + cell.getCol() * Cell.SIZE,
+                        y + (cell.getRow()) * Cell.SIZE);
 
-            cell = above;
-            cell.setRow(cell.getRow());
-            cell.setDestroy(false);
-
-            if(grid[cell.getRow()][cell.getCol()].toDestroy()) {
-                if(cell.getRow() + 1 < numRows) {
-                    getAbove(grid[cell.getRow() + 1][cell.getCol()]);
-                }
+                above.setCellType(ran.nextInt(3));
+                above.setPosition(
+                        x + above.getCol() * Cell.SIZE,
+                        y + (above.getRow() + 1) * Cell.SIZE);
+                above.setDestination(
+                        x + above.getCol() * Cell.SIZE,
+                        y + (above.getRow()) * Cell.SIZE);
             }
-//                grid[cell.getRow()][cell.getCol()].setDestination(
-//                        x + clickedCol * Cell.SIZE,
-//                        y + (numRows - clickedRow - 1) * Cell.SIZE);
-//                grid[cell.getRow()][cell.getCol() + 1].setDestination(
-//                        x + (clickedCol + 1) * Cell.SIZE,
-//                        y + (numRows - clickedRow - 1) * Cell.SIZE);
+        } else {
+            if(cell.toDestroy()) {
+                cell.setCellType(ran.nextInt(3));
+                cell.setPosition(
+                        x + cell.getCol() * Cell.SIZE,
+                        y + (cell.getRow() + 1) * Cell.SIZE);
+                cell.setDestination(
+                        x + cell.getCol() * Cell.SIZE,
+                        y + (cell.getRow()) * Cell.SIZE);
+                cell.setDestroy(false);
+            }
         }
     }
 
@@ -232,18 +254,12 @@ public class Grid {
             for (int col = 0; col < numCols; col++) {
                 Cell cell = grid[row][col];
                 if (cell.toDestroy()) {
-//                    if (cell.getRow() + 1 < numRows) {
-                        getAbove(cell);
-//                        System.out.println(cell.getObject());
-//                    }
+                    getAbove(cell);
                 }
                 cell.update(dt);
             }
         }
     }
-
-
-
 
     public void render(SpriteBatch sb) {
         sb.setColor(bgColor);
@@ -257,11 +273,9 @@ public class Grid {
     }
 
     private void addGroup(Cell cell) {
-//        System.out.println(cell.getRow() + "," +
         cell.setSelected(true);
         cell.setSearched(true);
         searchGrid(cell);
-//        System.out.println("Searching: " + cell.getObject());
         selectedGroup.add(cell);
     }
 
