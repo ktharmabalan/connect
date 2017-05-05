@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Cell {
 
-
     public enum CellType {
         RED(Color.RED),
         GREEN(Color.GREEN),

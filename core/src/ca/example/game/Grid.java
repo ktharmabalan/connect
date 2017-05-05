@@ -18,7 +18,7 @@ public class Grid {
 //    public static int PADDING = 20;
     public static int PADDING = 0;
     public static int SIZE = ConnectGame.WIDTH - PADDING * 2;
-    private final int SCORE_MULTIPLIER = 100;
+    private final int SCORE_MULTIPLIER = 10;
 
 //    private Color bgColor  = new Color(0, 0, 0, 1);
     private Color bgColor  = Color.LIGHT_GRAY;
