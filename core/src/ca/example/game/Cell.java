@@ -59,14 +59,18 @@ public class Cell {
     private boolean searched;
     private boolean selected;
     private boolean destroy;
+    private boolean removed = false;
 
-    private static float speed = 100;
+    private static float speed = 50;
     private Animation animation;
     private Animation selected_animation;
     private float timePassed = 0;
 
+    private Texture cell_border = new Texture("border.png");
+
     Texture[] icons = {
-            new Texture("icon.png")
+            new Texture("0icon.png")
+//            new Texture("icon.png")
 //            new Texture("icon0.png"),
 //            new Texture("icon1.png"),
 //            new Texture("icon2.png"),
@@ -187,6 +191,14 @@ public class Cell {
         this.col = col;
     }
 
+    public void setRemoved(boolean removed) {
+        this.removed = removed;
+    }
+
+    public boolean getRemoved() {
+        return removed;
+    }
+
     public void update(float dt) {
         x += dx * speed * dt;
         y += dy * speed * dt;
@@ -212,13 +224,24 @@ public class Cell {
         } else {
             sb.setColor(cellType.getColor());
 //            sb.draw(texture, x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
+            sb.draw(texture, x, y, SIZE, SIZE);
 
 //            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
             if (isSelected()) {
                 sb.setColor(cellType.getSelectedColor());
 //                sb.draw(selected_animation.getKeyFrame(timePassed, true), x, y, SIZE, SIZE);
+                sb.draw(texture, x, y, SIZE, SIZE);
+
+                sb.setColor(Color.ORANGE);
+                sb.draw(cell_border, x, y, SIZE, SIZE);
             }
-            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
+//            sb.draw(cell_border, x, y, SIZE, SIZE);
+//            sb.draw(animation.getKeyFrame(timePassed, true), x + PADDING, y + PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
         }
+
+//        if(getRemoved()) {
+//            sb.setColor(Color.PURPLE);
+//            sb.draw(cell_border, x, y, SIZE, SIZE);
+//        }
     }
 }

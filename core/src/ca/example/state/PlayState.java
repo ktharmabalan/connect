@@ -21,8 +21,8 @@ public class PlayState extends State {
     public PlayState(StateManager stateManager) {
         super(stateManager);
 
-        int rows = 6;
-        int cols = 6;
+        int rows = 10;
+        int cols = 10;
 
         /*int[][] g = {
                 {0,1,2},
@@ -54,15 +54,16 @@ public class PlayState extends State {
             mouse.x = Gdx.input.getX();
             mouse.y = Gdx.input.getY();
             cam.unproject(mouse);
-            if(mouse.x > startx + DRAG_DIST) {
-                grid.move(1, 0);
-            } else if(mouse.x < startx - DRAG_DIST) {
-                grid.move(-1, 0);
-            } else if(mouse.y > starty + DRAG_DIST) {
-                grid.move(0, 1);
-            } else if(mouse.y < starty - DRAG_DIST) {
-                grid.move(0, -1);
-            }
+            // Swap cells
+//            if(mouse.x > startx + DRAG_DIST) {
+//                grid.move(1, 0);
+//            } else if(mouse.x < startx - DRAG_DIST) {
+//                grid.move(-1, 0);
+//            } else if(mouse.y > starty + DRAG_DIST) {
+//                grid.move(0, 1);
+//            } else if(mouse.y < starty - DRAG_DIST) {
+//                grid.move(0, -1);
+//            }
         }
 
         grid.update(dt);
